@@ -1,5 +1,9 @@
 # Dust box prototype kit
 
+
+_Fork and BME280 GYBMEP version of the original dust_box._
+
+
 Cloud support: https://iotguru.cloud
 
 Support forum: https://forum.iotguru.live/viewtopic.php?f=17&t=6
@@ -28,3 +32,12 @@ Live example: https://iotguru.live/device/u_m5VpzbejH2jIowKWYR6g
 ![Box top](https://github.com/IoTGuruLive/dust_box/blob/master/images/3d_model_top.png)
 
 * The box top: model/Dust-SDS011-top.FCStd and model/Dust-SDS011-top.stl
+
+## Wiring
+
+| WEMOS | BME280 |
+|-------|--------|
+| D1    | SCL    |
+| D2    | SDA    |
+| 5V    | VIN    |
+| GND   | GND    |
