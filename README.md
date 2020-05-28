@@ -33,11 +33,20 @@ Live example: https://iotguru.live/device/u_m5VpzbejH2jIowKWYR6g
 
 * The box top: model/Dust-SDS011-top.FCStd and model/Dust-SDS011-top.stl
 
+## Arduino IDE
+
+First of all, in the preferences add the https://arduino.esp8266.com/stable/package_esp8266com_index.json to the list of Additional board managers.
+
+Second, install the `The IoT Guru integration` library in the library manager.
+
 ## Wiring
 
-| WEMOS | BME280 |
-|-------|--------|
-| D1    | SCL    |
-| D2    | SDA    |
-| 5V    | VIN    |
-| GND   | GND    |
+| WEMOS | BME280 | SDS011 |
+|-------|--------|--------|
+| D1    | SCL    |        |
+| D2    | SDA    |        |
+| 5V    | VIN    | 5V     |
+| GND   | GND    | GND    |
+| D3    |        | RXD    |
+| D4    |        | TXD    |
+
