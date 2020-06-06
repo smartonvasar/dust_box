@@ -1,7 +1,6 @@
 # Dust box prototype kit
 
-
-_Fork and BME280 GYBMEP version of the original dust_box._
+_Fork BME280 GYBMEP version of the original dust_box for SMARTONvásár project_
 
 
 Cloud support: https://iotguru.cloud
@@ -12,26 +11,12 @@ Support forum: https://forum.iotguru.live/viewtopic.php?f=17&t=6
 
 ![Box](https://github.com/IoTGuruLive/dust_box/blob/master/images/box.jpg)
 
-- based on SDS-011 dust sensor and BME280/BME680 environmental sensor
+- based on SDS-011 dust sensor and BME280 GYBMEP environmental sensor
 - measure PM10, PM2.5, temperature, humidity and pressure and send it to our cloud
 
 Live example: https://iotguru.live/device/u_m5VpzbejH2jIowKWYR6g
 
-## Gerber ZIP to print the PCB
 
-![Gerber PBC](https://github.com/IoTGuruLive/dust_box/blob/master/images/pcb_top.png)
-
-* gerber/gerber.zip
-
-## 3D printable model
-
-![Box bottom](https://github.com/IoTGuruLive/dust_box/blob/master/images/3d_model_bottom.png)
-
-* The box bottom: model/Dust-SDS011-bottom.FCStd and model/Dust-SDS011-bottom.stl
-
-![Box top](https://github.com/IoTGuruLive/dust_box/blob/master/images/3d_model_top.png)
-
-* The box top: model/Dust-SDS011-top.FCStd and model/Dust-SDS011-top.stl
 
 ## Arduino IDE
 
@@ -49,4 +34,10 @@ Second, install the `The IoT Guru integration` library in the library manager.
 | GND   | GND    | GND    |
 | D3    |        | RXD    |
 | D4    |        | TXD    |
+
+![wiring by fritzing](dust_box_bb.png)
+
+## Live data charts
+
+https://smartonvasar.github.io/dustbox-charts/
 
