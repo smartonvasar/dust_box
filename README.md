@@ -32,8 +32,8 @@ Second, install the `The IoT Guru integration` library in the library manager.
 | D2    | SDA    |        |
 | 5V    | VIN    | 5V     |
 | GND   | GND    | GND    |
-| D3    |        | RXD    |
-| D4    |        | TXD    |
+| D3    |        | TXD    |
+| D4    |        | RXD    |
 
 ![wiring by fritzing](dust_box_bb.png)
 
