@@ -8,24 +8,27 @@
   #include <WiFi.h>
 #endif
 
-const char* ssid      = "ssid";
-const char* password  = "password";
+const char* ssid      = "xxx";
+const char* password  = "xxx";
 
 WiFiClient client;
 
-String userShortId    = "uuuuuuuuuuuuuuuuuuuuuu";
-String deviceShortId  = "dddddddddddddddddddddd";
-String deviceKey      = "kkkkkkkkkkkkkkkkkkkkkk";
+String userShortId    = "xxx";
+String deviceShortId  = "xxx";
+String deviceKey      = "xxx";
+
+String sdsNodeShortId    = "xxx";
+String bmeNodeShortId    = "xxx";
+String statusNodeShortId = "xxx";
+
 IoTGuru iotGuru = IoTGuru(userShortId, deviceShortId, deviceKey);
 
-String sdsNodeShortId    = "ssssssssssssssssssssss";
-String bmeNodeShortId    = "bbbbbbbbbbbbbbbbbbbbbb";
 const char* ota_version = "sds011-bme280-mqtt-1.0.0";
 
-volatile int PIN_SDA     = 4;
-volatile int PIN_SCL     = 5;
-volatile int PIN_SDS_RX  = 0;
-volatile int PIN_SDS_TX  = 2;
+volatile int PIN_SDA     = 4; // wemos D2
+volatile int PIN_SCL     = 5; // wemos D1
+volatile int PIN_SDS_RX  = 0; // wemos D3
+volatile int PIN_SDS_TX  = 2; // wemos D4
 
 #include "SdsDustSensor.h"
 SdsDustSensor sds(PIN_SDS_RX, PIN_SDS_TX);
@@ -50,10 +53,12 @@ void setup() {
 
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
-        delay(50);
-        Serial.print(".");
+        delay(200);
+        Serial.println("wifi?");
     }
-    Serial.println("");
+    Serial.println("wifi OK.");
+    Serial.print("ChipId: ");
+    Serial.println(String(ESP.getChipId()));
 
     /**
      * Set the callback function.
@@ -83,10 +88,8 @@ void setup() {
     Serial.println(sds.queryFirmwareVersion().toString());
     Serial.println(sds.setQueryReportingMode().toString());
 
-    if (bme.begin(0x76))
+    if (! bme.begin(0x76))
     {
-        
-    } else {
         Serial.println("Could not find a valid BME280 sensor, check wiring!");
     }
 }
@@ -97,6 +100,7 @@ volatile unsigned long readAttempt = 12;
 
 void loop() {
     if (iotGuru.check(ota_version)) {
+        Serial.println("Check ota version");
         ESP.restart();
     }
 
@@ -132,10 +136,12 @@ void loop() {
     }
 
     if (nextSend < millis()) {
+        PmResult pm = sds.queryPm();
         if (readAttempt == 0) {
             nextSend = nextWakeup + 30000;
             readAttempt = 12;
             Serial.println("Turn off the SDS sensor");
+            iotGuru.sendMqttValue(statusNodeShortId, "error", PMStatusToString(pm.statusToString()));
             sds.sleep();
             return;
         }
@@ -143,7 +149,6 @@ void loop() {
         nextSend = millis() + 2500;
         readAttempt--;
 
-        PmResult pm = sds.queryPm();
         if (pm.isOk()) {
 
             sdsDeviceId.inBytes[0] = pm.deviceId()[0];
@@ -177,4 +182,26 @@ void loop() {
 
 void callback(const char* nodeShortId, const char* fieldName, const char* message) {
     Serial.print(nodeShortId);Serial.print(" - ");Serial.print(fieldName);Serial.print(": ");Serial.println(message);
+}
+
+int PMStatusToString(String status) {
+  if (status == "Ok") {
+    return 0;
+  }
+  if (status == "Not available") {
+    return 101;
+  }
+  if (status == "Invalid checksum") {
+    return 102;
+  }
+  if (status == "Invalid response id") {
+    return 103;
+  }
+  if (status == "Invalid head") {
+    return 104;
+  }
+  if (status == "Invalid tail") {
+    return 105;
+  }
+  return 106;
 }
