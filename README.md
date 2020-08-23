@@ -48,3 +48,8 @@ https://smartonvasar.github.io/levego/
 * build it
 * upload the fresh version to the firmwares section in the cloud
 * set the target version in the device details
+
+## sensor.community
+
+Device registry: https://devices.sensor.community/sensors
+

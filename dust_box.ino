@@ -3,6 +3,7 @@
 #include <IoTGuru.h>
 #ifdef ESP8266
   #include <ESP8266WiFi.h>
+  #include <ESP8266HTTPClient.h>
 #endif
 
 #ifdef ESP32
@@ -24,6 +25,7 @@ const char* ota_version = IOTGURU_OTA_VERSION;
 
 IoTGuru iotGuru = IoTGuru(userShortId, deviceShortId, deviceKey);
 WiFiClient client;
+HTTPClient sensorCommunityClient;
 
 volatile int PIN_SDA     = 4; // wemos D2
 volatile int PIN_SCL     = 5; // wemos D1
@@ -92,6 +94,7 @@ void setup() {
     {
         Serial.println("Could not find a valid BME280 sensor, check wiring!");
     }
+    sensorCommunityClient.setReuse(true);
 }
 
 volatile unsigned long nextWakeup = 0;
@@ -127,6 +130,8 @@ void loop() {
         iotGuru.sendMqttValue(bmeNodeShortId, "humidity", humidity);
         iotGuru.sendMqttValue(bmeNodeShortId, "pressure", pressure);
         iotGuru.sendMqttValue(bmeNodeShortId, "altitude", altitude);
+
+        reportBMEToSensorCommunity(String(temp), String(humidity), String(pressure));
         
         Serial.println("Turn on the SDS sensor");
         sds.wakeup();
@@ -172,6 +177,8 @@ void loop() {
             iotGuru.sendMqttValue(sdsNodeShortId, "pm25", pm.pm25);
             iotGuru.sendMqttValue(sdsNodeShortId, "pm10", pm.pm10);
 
+            reportSDSToSensorCommunity(String(pm.pm10), String(pm.pm25));
+
             readAttempt = 0;
         } else {
             Serial.print("Could not read values from SDS sensor, reason: ");
@@ -204,4 +211,79 @@ int PMStatusToString(String status) {
     return 105;
   }
   return 106;
+}
+
+void reportSDSToSensorCommunity(String pm10, String pm25) {
+    client.connect("api.sensor.community", 80);
+    
+    Serial.print("[HTTP] SDS begin...\n");
+    // configure target server and url
+    sensorCommunityClient.begin(client, "http://api.sensor.community/v1/push-sensor-data/"); //HTTP
+    sensorCommunityClient.addHeader("Content-Type", "application/json");
+    // SDS
+    sensorCommunityClient.addHeader("X-Pin", "1");
+    sensorCommunityClient.addHeader("X-Sensor", "esp8266-" + String(ESP.getChipId()));
+    sensorCommunityClient.setTimeout(12000);
+
+    Serial.print("[HTTP] POST...\n");
+    // start connection and send HTTP header and body
+    String postData = "{\"sensor\":\"" + String(SENSORCOMMUNITY_SDS_SENSOR_ID) + "\",\"software_version\":\"" + String(IOTGURU_OTA_VERSION) + "\",\"sensordatavalues\":[{\"value_type\":\"P1\",\"value\":\"" + pm10 + "\"},{\"value_type\":\"P2\",\"value\":\"" + pm25 + "\"}]}";
+    Serial.print("[HTTP] POST data: " + postData + "\n");
+
+    int httpCode = sensorCommunityClient.POST(postData);
+
+    // httpCode will be negative on error
+    if (httpCode > 0) {
+      // HTTP header has been send and Server response header has been handled
+      Serial.printf("[HTTP] POST... code: %d\n", httpCode);
+
+      // file found at server
+      if (httpCode == HTTP_CODE_OK) {
+        const String& payload = sensorCommunityClient.getString();
+        Serial.println("received payload:\n<<");
+        Serial.println(payload);
+        Serial.println(">>");
+      }
+    } else {
+      Serial.printf("[HTTP] POST... failed, error: %s\n", sensorCommunityClient.errorToString(httpCode).c_str());
+    }
+    sensorCommunityClient.end();
+}
+
+
+void reportBMEToSensorCommunity(String temperature, String humidity, String pressure) {
+    client.connect("api.sensor.community", 80);
+    
+    Serial.print("[HTTP] BME begin...\n");
+    // configure target server and url
+    sensorCommunityClient.begin(client, "http://api.sensor.community/v1/push-sensor-data/"); //HTTP
+    sensorCommunityClient.addHeader("Content-Type", "application/json");
+    // BME
+    sensorCommunityClient.addHeader("X-Pin", "11");
+    sensorCommunityClient.addHeader("X-Sensor", "esp8266-" + String(ESP.getChipId()));
+    sensorCommunityClient.setTimeout(12000);
+
+    Serial.print("[HTTP] POST...\n");
+    // start connection and send HTTP header and body
+    String postData = "{\"sensor\":\"" + String(SENSORCOMMUNITY_BME_SENSOR_ID) + "\",\"software_version\":\"" + String(IOTGURU_OTA_VERSION) + "\",\"sensordatavalues\":[{\"value_type\":\"temperature\",\"value\":\"" + temperature + "\"},{\"value_type\":\"humidity\",\"value\":\"" + humidity + "\"},{\"value_type\":\"pressure\",\"value\":\"" + pressure + "\"}]}";
+    Serial.print("[HTTP] POST data: " + postData + "\n");
+
+    int httpCode = sensorCommunityClient.POST(postData);
+
+    // httpCode will be negative on error
+    if (httpCode > 0) {
+      // HTTP header has been send and Server response header has been handled
+      Serial.printf("[HTTP] POST... code: %d\n", httpCode);
+
+      // file found at server
+      if (httpCode == HTTP_CODE_OK) {
+        const String& payload = sensorCommunityClient.getString();
+        Serial.println("received payload:\n<<");
+        Serial.println(payload);
+        Serial.println(">>");
+      }
+    } else {
+      Serial.printf("[HTTP] POST... failed, error: %s\n", sensorCommunityClient.errorToString(httpCode).c_str());
+    }
+    sensorCommunityClient.end();
 }
