@@ -39,5 +39,12 @@ Second, install the `The IoT Guru integration` library in the library manager.
 
 ## Live data charts
 
-https://smartonvasar.github.io/dustbox-charts/
+https://smartonvasar.github.io/levego/
 
+
+## Update flow
+
+* update the `const char* ota_version = "smartonvasar-dust_box-box02-1.0.1";` value to the fresh version
+* build it
+* upload the fresh version to the firmwares section in the cloud
+* set the target version in the device details
