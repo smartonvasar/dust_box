@@ -1,5 +1,6 @@
-#include <IoTGuru.h>
+#include "config.h"
 
+#include <IoTGuru.h>
 #ifdef ESP8266
   #include <ESP8266WiFi.h>
 #endif
@@ -8,22 +9,21 @@
   #include <WiFi.h>
 #endif
 
-const char* ssid      = "xxx";
-const char* password  = "xxx";
+const char* ssid      = WIFI_SSID;
+const char* password  = WIFI_PASSWORD;
 
-WiFiClient client;
+String userShortId    = IOTGURU_USER_SHORT_ID;
+String deviceShortId  = IOTGURU_DEVICE_SHORT_ID;
+String deviceKey      = IOTGURU_DEVICE_KEY;
 
-String userShortId    = "xxx";
-String deviceShortId  = "xxx";
-String deviceKey      = "xxx";
+String sdsNodeShortId    = IOTGURU_SDS_NODE_SHORT_ID;
+String bmeNodeShortId    = IOTGURU_BME_NODE_SHORT_ID;
+String statusNodeShortId = IOTGURU_STATUS_NODE_SHORT_ID;
 
-String sdsNodeShortId    = "xxx";
-String bmeNodeShortId    = "xxx";
-String statusNodeShortId = "xxx";
+const char* ota_version = IOTGURU_OTA_VERSION;
 
 IoTGuru iotGuru = IoTGuru(userShortId, deviceShortId, deviceKey);
-
-const char* ota_version = "sds011-bme280-mqtt-1.0.0";
+WiFiClient client;
 
 volatile int PIN_SDA     = 4; // wemos D2
 volatile int PIN_SCL     = 5; // wemos D1
