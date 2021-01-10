@@ -189,6 +189,10 @@ void loop() {
 
 void callback(const char* nodeShortId, const char* fieldName, const char* message) {
     Serial.print(nodeShortId);Serial.print(" - ");Serial.print(fieldName);Serial.print(": ");Serial.println(message);
+    if (message == "restart") {
+      iotGuru.sendMqttValue(statusNodeShortId, "error", 200);
+      ESP.restart();
+    }
 }
 
 int PMStatusToString(String status) {
